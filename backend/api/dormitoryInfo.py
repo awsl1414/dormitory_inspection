@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 from fastapi import APIRouter
 from backend.models import Dormitory
-from backend.scheams import (
+from backend.schemas import (
     Response200,
     Response400,
     Dormitory_Pydantic,
