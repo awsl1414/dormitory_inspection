@@ -1,7 +1,9 @@
 from tortoise.contrib.pydantic import pydantic_model_creator
 from models import UserInfo, MainInfo
 
-UserInfo_Pydantic = pydantic_model_creator(UserInfo, name="UserInfo")
+UserInfo_Pydantic = pydantic_model_creator(
+    UserInfo, name="UserInfo", exclude=["password"]
+)
 UserInfoIn_Pydantic = pydantic_model_creator(
     UserInfo, name="UserInfoIn", exclude_readonly=True
 )

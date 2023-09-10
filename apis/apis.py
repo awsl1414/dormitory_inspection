@@ -1,9 +1,6 @@
-import json
-from typing import List
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from utils import (
-    get_password_hash,
     verify_password,
     create_access_token,
     get_current_user,
@@ -26,23 +23,22 @@ def hello():
     return "hello"
 
 
-@app01.post("/token", summary="获取token")
+@app01.post("/token", summary="登录")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     if user := await UserInfo.get(username=form_data.username):
-        token = create_access_token({"sub": user.username})
-        return ResponseToken(
-            data={"token": f"beadict数据转化成json数据rer {token}"}, access_token=token
-        )
-    return Response200()
+        if verify_password(form_data.password, user.password):
+            token = create_access_token({"sub": user.username})
+            return ResponseToken(data={"token": f"bearer {token}"}, access_token=token)
+    return Response400()
 
 
-@app01.post("/user", summary="用户新增")
-async def user_create(username: str, password: str):
-    if await UserInfo.filter(username=username):
+@app01.post("/user", summary="用户注册")
+async def user_create(user: UserInfoIn_Pydantic):
+    if await UserInfo.filter(username=user.username):
         return Response400(msg="用户已存在.")
     return Response200(
-        data=await UserInfoIn_Pydantic.from_tortoise_orm(
-            await UserInfo.create(username=username, password=password)
+        data=await UserInfo_Pydantic.from_tortoise_orm(
+            await UserInfo.create(**user.dict())
         )
     )
 

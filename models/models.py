@@ -1,7 +1,10 @@
 from enum import IntEnum
+from typing import Optional, Iterable
 from tortoise.models import Model
-from tortoise import fields
+from tortoise import fields, BaseDBAsyncClient
 
+
+import utils
 
 # class Level(IntEnum):
 #     excellent: int = 0
@@ -19,6 +22,21 @@ class UserInfo(Model):
         max_length=20, null=False, unique=True, description="用户名"
     )
     password = fields.CharField(max_length=64, null=False, description="密码")
+
+    async def save(
+        self,
+        using_db: Optional[BaseDBAsyncClient] = None,
+        update_fields: Optional[Iterable[str]] = None,
+        force_create: bool = False,
+        force_update: bool = False,
+    ) -> None:
+        if force_create or "password" in update_fields:
+            self.password = utils.get_password_hash(self.password)
+
+        await super(UserInfo, self).save(
+            using_db, update_fields, force_create, force_update
+        )
+
     # is_administrator = fields.IntEnumField(
     #     IsAdministrator, description="是否管理员", default=IsAdministrator.not_administrator
     # )
